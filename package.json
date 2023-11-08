@@ -1,0 +1,24 @@
+{
+  "name": "firefox_peppeteer_qoo10",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@antiadmin/anticaptchaofficial": "^1.0.44",
+    "@infosimples/node_two_captcha": "^1.2.0",
+    "axios": "^1.6.0",
+    "filereader": "^0.10.3",
+    "jsdom": "^22.1.0",
+    "nopecha": "^1.0.10",
+    "puppeteer": "^21.5.0",
+    "random-useragent": "^0.5.0"
+  },
+  "devDependencies": {
+    "mocha-jsdom": "^2.0.0"
+  }
+}
