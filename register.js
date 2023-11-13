@@ -46,8 +46,8 @@ const randomUseragent = require('random-useragent');
 // ]
 
 const combos = [
-    ['se8@copyhome.win', 'Zxcx!!8520'],
-    ['se9@copyhome.win', 'Zxcx!!8520'],
+    ['se26@copyhome.win', 'Zxcx!!8520'],
+    ['se27@copyhome.win', 'Zxcx!!8520'],
     // ['se3@copyhome.win', 'Zxcx!!8520'],
     // ['se4@copyhome.win', 'Zxcx!!8520'],
     // ['se5@copyhome.win', 'Zxcx!!8520'],
@@ -75,7 +75,7 @@ for (let combo of combos)
             // Launch the browser and open a new blank page
             // const browser = await puppeteer.launch({ headless: false });
             const page = await browser.newPage();
-            // await page.setUserAgent(randomUseragent.getRandom());
+            await page.setUserAgent(randomUseragent.getRandom());
         
             // 큐텐 출석체크 페이지 이동
 
@@ -150,7 +150,7 @@ for (let combo of combos)
 
             await page.waitForSelector('#recaptcha_response_field');
             await page.click("#recaptcha_response_field");
-            await page.type("#recaptcha_response_field", resultText);
+            await page.type("#recaptcha_response_field", resultText, {delay: 1000});
             // await new Promise((page) => setTimeout(page, 5000));
 
             // Click Register Button
