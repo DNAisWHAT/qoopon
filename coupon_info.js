@@ -86,91 +86,104 @@ for (let combo of combos)
             // const browser = await puppeteer.launch({ headless: false });
             const page = await browser.newPage();
             await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
+
+            let flag = true;
+
+            while (flag) {
+                try {
+                    await page.goto("https://www.qoo10.com/gmkt.inc/Login/PopupLogin.aspx?nextUrl=https%3a%2f%2fwww.qoo10.com%2fgmkt.inc%2fMyCoupon%2fMyCouponList.aspx%3fglobal_order_type%3dL");
+                    await page.setViewport({width: 1920, height: 1080});
         
-            // 큐텐 출석체크 페이지 이동
+                    // await page.waitForSelector('.lnk');
+                    // await page.click('.lnk');
+        
+                    await new Promise((page) => setTimeout(page, 5000));
+        
+                    // await page.goto("https://www.qoo10.com/gmkt.inc/Login/Login.aspx");
+        
+                    // Set screen size
+        
+                    // ID/PW 입력하기
+                    await page.waitForSelector('#login_id');
+                    await page.evaluate(()=>{
+                        document.querySelector('#login_id').value = '';
+                        document.querySelector('#passwd').value = '';
+                    });
+                    await page.type('#login_id', combo[0], {delay: 10});
+                    await page.waitForSelector('#passwd');
+                    await page.type('#passwd', combo[1], {delay: 10});
+        
+                    // DOM 이미지 주소 접근 및 캡챠 풀기
+                    // const dom = new JSDOM({url: 'https://www.qoo10.com/gmkt.inc/Login/Login.aspx',
+                    //                           contentType: "text/html",
+                    //                           includeNodeLocations: true,
+                    //                           storageQuota: 10000000});
+        
+        
+        
+                    const imgSrc = await page.evaluate(async () => {
+                        const img = document.querySelector('#qcaptcha_img');
+                        return img.src;
+                    }); 
+                    console.log(`captcha src result is : ${imgSrc}`);
+        
+                    // 2captcha
+                    client = new Client('479e6979ef2dc19082f5728d4aef968d', {
+                        timeout: 6000000,
+                        polling: 5000,
+                        throwErrors: false});
+        
+                    let resultText = '';
+        
+                    
+                    await client.decode({
+                        url: imgSrc
+                    }).then(function(response) {
+                        resultText = response.text;
+                        console.log(`2captcha solving : ${response.text}`);
+                    })
+        
+                    
+                    // const dom = await JSDOM.fromURL('https://www.qoo10.com/gmkt.inc/Login/Login.aspx');
+                    
+                    // const img_url = dom.window.document.querySelector('#qcaptcha_img').src
+        
+                    // text = await nopecha.solveRecognition({
+                    //     type: 'textcaptcha',
+                    //     image_urls: [imgSrc],
+                    // });
+        
+                    // await new Promise((page) => setTimeout(page, 1000));
+        
+                    console.log(`captcha result is : ${resultText}`);
+                    // await new Promise((page) => setTimeout(page, 3500));
+                    
+                    // 캡챠 결과 입력 후 로그인 버튼 클릭
+                    await page.waitForSelector('#recaptcha_response_field');
+                    await page.click('#recaptcha_response_field');
+                    await page.type('#recaptcha_response_field', resultText, {delay: 1000});
+                    // await new Promise((page) => setTimeout(page, 1000));
+        
+                    new Promise((page) => setTimeout(page, 5000));
+        
+                    // original
+                    // await page.waitForSelector('.btn_sign');
+                    // await page.click('.btn_sign');
+                    await page.waitForSelector('.btn_sign');
+                    await page.click('.btn_sign');
+                    // await page.evaluate(()=>{
+                    //     document.querySelector('.btn_sign').click();
+                    // })
 
-            // await page.goto('https://www.qoo10.com/gmkt.inc/Event/qchance.aspx');
-            
-            // 로그인 
+                    flag = false;
+                }
 
-            // await page.goto("https://www.qoo10.com/gmkt.inc/Event/qchance.aspx");
-            await page.goto("https://www.qoo10.com/gmkt.inc/Login/PopupLogin.aspx?nextUrl=https%3a%2f%2fwww.qoo10.com%2fgmkt.inc%2fMyCoupon%2fMyCouponList.aspx%3fglobal_order_type%3dL");
-            await page.setViewport({width: 1920, height: 1080});
+                catch (error) {
 
-            // await page.waitForSelector('.lnk');
-            // await page.click('.lnk');
+                }
+            }
 
-            await new Promise((page) => setTimeout(page, 2000));
-
-            // await page.goto("https://www.qoo10.com/gmkt.inc/Login/Login.aspx");
-
-            // Set screen size
-
-            // ID/PW 입력하기
-            await page.waitForSelector('#login_id');
-            await page.type('#login_id', combo[0], {delay: 10});
-            await page.waitForSelector('#passwd');
-            await page.type('#passwd', combo[1], {delay: 10});
-
-            // DOM 이미지 주소 접근 및 캡챠 풀기
-            // const dom = new JSDOM({url: 'https://www.qoo10.com/gmkt.inc/Login/Login.aspx',
-            //                           contentType: "text/html",
-            //                           includeNodeLocations: true,
-            //                           storageQuota: 10000000});
-
-
-
-            const imgSrc = await page.evaluate(async () => {
-                const img = document.querySelector('#qcaptcha_img');
-                return img.src;
-            }); 
-            console.log(`captcha src result is : ${imgSrc}`);
-
-            // 2captcha
-            client = new Client('479e6979ef2dc19082f5728d4aef968d', {
-                timeout: 6000000,
-                polling: 5000,
-                throwErrors: false});
-
-            let resultText = '';
-
-            
-            await client.decode({
-                url: imgSrc
-            }).then(function(response) {
-                resultText = response.text;
-                console.log(`2captcha solving : ${response.text}`);
-            })
-
-            
-            // const dom = await JSDOM.fromURL('https://www.qoo10.com/gmkt.inc/Login/Login.aspx');
-            
-            // const img_url = dom.window.document.querySelector('#qcaptcha_img').src
-
-            // text = await nopecha.solveRecognition({
-            //     type: 'textcaptcha',
-            //     image_urls: [imgSrc],
-            // });
-
-            // await new Promise((page) => setTimeout(page, 1000));
-
-            console.log(`captcha result is : ${resultText}`);
-            // await new Promise((page) => setTimeout(page, 3500));
-            
-            // 캡챠 결과 입력 후 로그인 버튼 클릭
-            await page.waitForSelector('#recaptcha_response_field');
-            await page.click('#recaptcha_response_field');
-            await page.type('#recaptcha_response_field', resultText, {delay: 1000});
-            // await new Promise((page) => setTimeout(page, 1000));
-
-            new Promise((page) => setTimeout(page, 5000));
-
-            // original
-            // await page.waitForSelector('.btn_sign');
-            // await page.click('.btn_sign');
-            await page.evaluate(()=>{
-                document.querySelector('.btn_sign').click();
-            })
+           
 
             try {
                 await page.waitForSelector('#coupon_list_title');
@@ -191,6 +204,7 @@ for (let combo of combos)
             await page.screenshot({path: `./coupons_db/${combo[0]}_${dateString}.jpg`});
             console.log(`${combo[0]} done.`);
             await page.close();
+            
             /// 아래 주석은 쿠폰 표 csv 추출 코드 
             //  let expiration_column = page.evaluate(()=> {
             //     let expiration_column = [];

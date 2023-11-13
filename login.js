@@ -1,7 +1,8 @@
-// const puppeteer = require('puppeteer')
-// import puppeteer from "puppeteer";
 
-// import nopecha from 'nopecha'
+//  이 코드는 로그인하여 룰렛을 손수 돌려주는 코드입니다.
+/// login.js         -> coupon_info.js          -> coupon_OCR.js
+/// 로그인 후 룰렛 돌리기 -> 룰렛 돌린 계정 쿠폰 사진 찍기  -> 쿠폰 사진 텍스트 인식해서 계정별로 몇장 가지고 있는지 확인하기
+
 const { Configuration, NopeCHAApi } = require('nopecha');
 const jsdom = require("jsdom");
 const puppeteer = require('puppeteer');
@@ -70,7 +71,6 @@ const combos = [
 for (let combo of combos)
     {    (async () => {
 
-
             const configuration = new Configuration({
                 apiKey: 'smhff9hf1gayxjxt',
             });
@@ -90,124 +90,78 @@ for (let combo of combos)
             // await page.goto('https://www.qoo10.com/gmkt.inc/Event/qchance.aspx');
             
             // 로그인 
+            let flag = true;
 
-            await page.goto("https://www.qoo10.com/gmkt.inc/Event/qchance.aspx");
-            await page.setViewport({width: 1920, height: 1080});
+            while(flag) {
+                try {
+                    await page.goto("https://www.qoo10.com/gmkt.inc/Event/qchance.aspx");
+                    await page.setViewport({width: 1920, height: 1080});
+                    await new Promise((page) => setTimeout(page, 2000));
+                    await page.waitForSelector('.lnk');
+                    await page.click('.lnk');
+                    await new Promise((page) => setTimeout(page, 2000));
+        
+                    // await page.goto("https://www.qoo10.com/gmkt.inc/Login/Login.aspx");
+        
+                    // Set screen size
+        
+                    // ID/PW 입력하기
+                    await page.waitForSelector('#login_id');
+                    await page.evaluate(()=>{
+                        document.querySelector('#login_id').value = '';
+                        document.querySelector('#passwd').value = '';
+                    })
+                    await page.type('#login_id', combo[0], {delay: 10});
+                    await page.waitForSelector('#passwd');
+                    await page.type('#passwd', combo[1], {delay: 10});
+        
+                    const imgSrc = await page.evaluate(async () => {
+                        const img = document.querySelector('#qcaptcha_img');
+                        return img.src;
+                    }); 
+                    console.log(`captcha src result is : ${imgSrc}`);
+        
+                    // 2captcha
+                    client = new Client('479e6979ef2dc19082f5728d4aef968d', {
+                        timeout: 600000,
+                        polling: 5000,
+                        throwErrors: false});
+        
+                    let resultText = '';
+        
+                    
+                    await client.decode({
+                        url: imgSrc
+                    }).then(function(response) {
+                        resultText = response.text;
+                        console.log(`2captcha solving : ${response.text}`);
+                    })
+        
+        
+                    console.log(`captcha result is : ${resultText}`);
+                    // await new Promise((page) => setTimeout(page, 3500));
+                    
+                    // 캡챠 결과 입력 후 로그인 버튼 클릭
+                    await page.waitForSelector('#recaptcha_response_field');
+                    await page.click('#recaptcha_response_field');
+                    await page.type('#recaptcha_response_field', resultText, {delay: 1000});
+                    // await new Promise((page) => setTimeout(page, 1000));
+        
+                    new Promise((page) => setTimeout(page, 5000));
+        
+                    // original
+                    await page.waitForSelector('.btn_sign');
+                    await page.click('.btn_sign');
+        
+                    flag = false;
+                    
+                    
+                }
 
-            await page.waitForSelector('.lnk');
-            await page.click('.lnk');
+                catch (error) {
 
-            await new Promise((page) => setTimeout(page, 2000));
-
-            // await page.goto("https://www.qoo10.com/gmkt.inc/Login/Login.aspx");
-
-            // Set screen size
-
-            // ID/PW 입력하기
-            await page.waitForSelector('#login_id');
-            await page.type('#login_id', combo[0], {delay: 10});
-            await page.waitForSelector('#passwd');
-            await page.type('#passwd', combo[1], {delay: 10});
-
-            // DOM 이미지 주소 접근 및 캡챠 풀기
-            // const dom = new JSDOM({url: 'https://www.qoo10.com/gmkt.inc/Login/Login.aspx',
-            //                           contentType: "text/html",
-            //                           includeNodeLocations: true,
-            //                           storageQuota: 10000000});
-
-
-
-            const imgSrc = await page.evaluate(async () => {
-                const img = document.querySelector('#qcaptcha_img');
-                return img.src;
-            }); 
-            console.log(`captcha src result is : ${imgSrc}`);
-
-            // 2captcha
-            client = new Client('479e6979ef2dc19082f5728d4aef968d', {
-                timeout: 600000,
-                polling: 5000,
-                throwErrors: false});
-
-            let resultText = '';
-
-            
-            await client.decode({
-                url: imgSrc
-            }).then(function(response) {
-                resultText = response.text;
-                console.log(`2captcha solving : ${response.text}`);
-            })
-
-            
-            // const dom = await JSDOM.fromURL('https://www.qoo10.com/gmkt.inc/Login/Login.aspx');
-            
-            // const img_url = dom.window.document.querySelector('#qcaptcha_img').src
-
-            // text = await nopecha.solveRecognition({
-            //     type: 'textcaptcha',
-            //     image_urls: [imgSrc],
-            // });
-
-            // await new Promise((page) => setTimeout(page, 1000));
-
-            console.log(`captcha result is : ${resultText}`);
-            // await new Promise((page) => setTimeout(page, 3500));
-            
-            // 캡챠 결과 입력 후 로그인 버튼 클릭
-            await page.waitForSelector('#recaptcha_response_field');
-            await page.click('#recaptcha_response_field');
-            await page.type('#recaptcha_response_field', resultText, {delay: 1000});
-            // await new Promise((page) => setTimeout(page, 1000));
-
-            new Promise((page) => setTimeout(page, 5000));
-
-            // original
-            await page.waitForSelector('.btn_sign');
-            await page.click('.btn_sign');
-
-            new Promise((page) => setTimeout(page, 5000));
-
-            // await page.goto('https://www.qoo10.com/gmkt.inc/MyCoupon/MyCouponList.aspx?global_order_type=L');
+                }
+            }
             new Promise((page) => setTimeout(page, 6000000));
 
-            // await page.waitForSelector('#td_today');
-            // await page.click('#td_today');
-
-            // 이벤트 룰렛 페이지 접근
-            // await page.goto("https://www.qoo10.com/gmkt.inc/Event/qchance.aspx");
-            // await page.waitForSelector('.btn_sign');
-            // await page.click('.click > a');
-            // document.querySelector('#today_click');
-            // 로그인 창 폼 채우기
-
-            // const idSelector = '#login_id'
-            // const pwSelector = '#passwd'
-            // await page.waitForSelector(idSelector);
-            // await page.type(idSelector, combo[0]);
-
-            // await page.waitForSelector(pwSelector);
-            // await page.type(idSelector, combo[1]);
-        
-            // 캡챠 클릭하고 로그인 버튼 누르기
-            
-            
-
-            // 다시 출석카드 버튼 누르고 확인 버튼 누르기
-            // await page.click('.click')
-            // await page.waitForSelector('.btn btn--submit')
-            // await page.click('.btn btn--submit')
-
-            // 종료하기
-            // await browser.close();
-
-            // // Locate the full title with a unique string
-            // const textSelector = await page.waitForSelector(
-            //   'text/Customize and automate'
-            // );
-            // const fullTitle = await textSelector?.evaluate(el => el.textContent);
-        
-            // // Print the full title
-            // console.log('The title of this blog post is "%s".', fullTitle);
-        })();
-}
+})()}
