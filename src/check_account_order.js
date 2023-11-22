@@ -69,6 +69,9 @@ const combos = [
     // ['se21@copyhome.win', 'Zxcx!!8520'],
 ]
 
+const jsonFile = fs.readFileSync('../combos.json', 'utf8');
+const jsonData = JSON.parse(jsonFile);
+
 
 async function captcha() {
 
@@ -311,7 +314,7 @@ async function main(combo)  {
 
 
 // 될 때까지 간다!
-for (let combo of combos)
+for (let combo of jsonData)
     {   
         try {
             main(combo)

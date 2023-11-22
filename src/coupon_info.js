@@ -57,7 +57,10 @@ const combos = [
     ['se25@copyhome.win', 'Zxcx!!852020'],
 ]
 
-for (let combo of combos)
+const jsonFile = fs.readFileSync('../combos.json', 'utf8');
+const jsonData = JSON.parse(jsonFile);
+
+for (let combo of jsonData)
     {    (async () => {
 
 
@@ -172,7 +175,7 @@ for (let combo of combos)
             var day = ('0' + today.getDate()).slice(-2);
             var dateString = year + '-' + month + '-' + day;
             await page.setViewport({width: 1920, height: 1080});
-            await page.screenshot({path: `./coupons_db/${combo[0]}_${dateString}.jpg`});
+            await page.screenshot({path: `../coupons_image_db/${combo[0]}_${dateString}.jpg`});
             console.log(`${combo[0]} done.`);
             await page.close();
         })();

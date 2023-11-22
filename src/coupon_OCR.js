@@ -53,7 +53,7 @@ const fs = require('fs');
 //     ['se25@copyhome.win', 'Zxcx!!8520'],
 // ]
 
-let combos = fs.readdirSync('./coupons_db');
+let combos = fs.readdirSync('../coupons_image_db');
 combos.shift();
 console.log(combos);
 // console.log(`combos : ${combos}`);
@@ -69,9 +69,9 @@ function main()
 {
     Promise.all(combos.map(async (combo) => {
         const worker = await tesseract.createWorker('eng');
-        const ret = await worker.recognize(`./coupons_db/${combo}`);
+        const ret = await worker.recognize(`../coupons_image_db/${combo}`);
         const coupon = ret.data.text;
-        let thirty = coupon.match(/6,630/g)?.length;
+        let thirty = coupon.match(/6,520/g)?.length;
         if (thirty === undefined) {
           thirty = 0;
         }
