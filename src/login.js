@@ -417,21 +417,34 @@ for (let combo of jsonData)
             new Promise((new_page) => setTimeout(new_page, 5000));
             // await new_page.waitForSelector('#old_pwd');
 
+            let combos = JSON.parse(fs.readFileSync('../combos.json', 'utf8'));
+
             if (combo[1] === 'Zxcx!!852020') {
                 await new_page.evaluate(() => {
                     document.querySelector('#old_pwd').value = 'Zxcx!!852020';
                     document.querySelector('#new_pwd').value = 'Zxcx!!8520';
                     document.querySelector('#new_pwd2').value = 'Zxcx!!8520';
-            })
-                  }
-
-            else {
-                    await new_page.evaluate(() => {
-                    document.querySelector('#old_pwd').value = 'Zxcx!!852020';
-                    document.querySelector('#new_pwd').value = 'Zxcx!!8520';
-                    document.querySelector('#new_pwd2').value = 'Zxcx!!8520';
-                    })
-                }
+                })
+                combos = combos.map(item => {
+                    if (item[0] === combo[0]) {
+                        item[1] = 'Zxcx!!8520';
+                    }
+                    return item;
+                });
+            } else {
+                await new_page.evaluate(() => {
+                    document.querySelector('#old_pwd').value = 'Zxcx!!8520';
+                    document.querySelector('#new_pwd').value = 'Zxcx!!852020';
+                    document.querySelector('#new_pwd2').value = 'Zxcx!!852020';
+                })
+                combos = combos.map(item => {
+                    if (item[0] === combo[0]) {
+                        item[1] = 'Zxcx!!852020';
+                    }
+                    return item;
+                });
+            }
+            fs.writeFileSync('../combos.json', JSON.stringify(combos, null, 2));
             
 
             new_page.click('#btn_change');
