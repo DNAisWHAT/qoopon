@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -12,12 +12,18 @@
     "@antiadmin/anticaptchaofficial": "^1.0.44",
     "@infosimples/node_two_captcha": "^1.2.0",
     "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
     "filereader": "^0.10.3",
+    "image-downloader": "^4.3.0",
     "jsdom": "^22.1.0",
+    "node-kakao": "^4.5.0",
     "nopecha": "^1.0.10",
     "puppeteer": "^21.5.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "random-useragent": "^0.5.0",
-    "tesseract.js": "^5.0.3"
+    "tesseract.js": "^5.0.3",
+    "user-agents": "^1.1.28"
   },
   "devDependencies": {
     "mocha-jsdom": "^2.0.0"

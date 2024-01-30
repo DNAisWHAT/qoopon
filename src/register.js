@@ -4,9 +4,11 @@
 // import nopecha from 'nopecha'
 const { Configuration, NopeCHAApi } = require('nopecha');
 const jsdom = require("jsdom");
-const puppeteer = require('puppeteer');
 const { JSDOM } = jsdom;
-
+// const KnownDevices = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
 
 const ac = require("@antiadmin/anticaptchaofficial");
@@ -45,22 +47,23 @@ const randomUseragent = require('random-useragent');
 
 // ]
 
-const combos = [
-    ['se28@copyhome.win', 'Zxcx!!8520'],
-    ['se29@copyhome.win', 'Zxcx!!8520'],
-    // ['se3@copyhome.win', 'Zxcx!!8520'],
-    // ['se4@copyhome.win', 'Zxcx!!8520'],
-    // ['se5@copyhome.win', 'Zxcx!!8520'],
-    
-    // ['se21@kumli.racing', 'Zxcx!!8520'],
-    // ['se22@kumli.racing', 'Zxcx!!8520'],
-    // ['se23@kumli.racing', 'Zxcx!!8520'],
-    // ['se24@kumli.racing', 'Zxcx!!8520'],
-    // ['se25@kumli.racing', 'Zxcx!!8520'],
-]
+
+let combos = [];
+
+let start = 31; // 시작 번호를 설정하세요.
+let end = 35; // 끝 번호를 설정하세요.
+
+for(let i = start; i <= end; i++) {
+    combos.push([`aln${i}@copyhome.win`, 'Zxcx!!8520']);
+}
+
+fs.writeFileSync('combos.json', JSON.stringify(combos, null, 2));
 
 for (let combo of combos)
     {    (async () => {
+            
+
+            let flag = true;
 
 
             const configuration = new Configuration({
@@ -76,6 +79,26 @@ for (let combo of combos)
             // const browser = await puppeteer.launch({ headless: false });
             const page = await browser.newPage();
             await page.setUserAgent(randomUseragent.getRandom());
+
+            const viewports = [
+                { width: 1920, height: 1080 },
+                { width: 1366, height: 768 },
+                { width: 1440, height: 900 },
+                { width: 1536, height: 864 },
+                { width: 1280, height: 720 },
+            ];
+            const randomViewport = viewports[Math.floor(Math.random() * viewports.length)];
+            await page.setViewport(randomViewport);
+
+            // await page.evaluateOnNewDocument(() => {
+            //     Object.defineProperty(navigator, 'userAgent', {
+            //       get() {
+            //         return 'your-dynamic-user-agent';      },
+            //     });
+            //   });
+            
+            // await page.emulate(KnownDevices['iPad Pro 11 landscape']);
+            
         
             // 큐텐 출석체크 페이지 이동
 
@@ -83,15 +106,17 @@ for (let combo of combos)
             
             // 로그인 
 
+            while (flag) {
+
+                try {
             await page.goto("https://www.qoo10.com/gmkt.inc/Login/Login.aspx");
             await page.setViewport({width: 1920, height: 1080});
-
             await page.waitForSelector('#tab_simple_register');
             await page.click('#tab_simple_register');
 
             await new Promise((page) => setTimeout(page, 1000));
-
-            // 커스텀 E-mail 사용 체크 
+            
+                // 커스텀 E-mail 사용 체크 
             await page.waitForSelector('#email_id_domain');
             await page.select('#email_id_domain', 'type email');
 
@@ -159,9 +184,28 @@ for (let combo of combos)
                 btn_sign.click();
             })
 
-            console.log(`${combo[0]}: done!`)
+            await page.waitForNavigation({timeout: 5000}); // 어쨌든 리다이렉트 되기를 기다리는 중...
 
-            new Promise((page) => setTimeout(page, 100000));
+            console.log(`${combo[0]}: done!`);
 
+            // new Promise((page) => setTimeout(page, 100000));
+
+
+            flag = false;
+
+            }
+
+            catch(error) 
+            
+            {
+
+            }
+
+
+            }
+
+            let combos = require('../combos.json');
+            combos.push([combo[0], combo[1]]);
+            fs.writeFileSync('..combos.json', JSON.stringify(combos, null, 2));          
         })();
 }

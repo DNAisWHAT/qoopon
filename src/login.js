@@ -1,4 +1,3 @@
-
 //  이 코드는 로그인하여 룰렛을 손수 돌려주는 코드입니다.
 /// login.js         -> coupon_info.js          -> coupon_OCR.js
 /// 로그인 후 룰렛 돌리기 -> 룰렛 돌린 계정 쿠폰 사진 찍기  -> 쿠폰 사진 텍스트 인식해서 계정별로 몇장 가지고 있는지 확인하기
@@ -51,7 +50,7 @@ for (let combo of jsonData)
             // const browser = await puppeteer.launch({ headless: false });
             const page = await browser.newPage();
             // await page.setUserAgent(userAgent.random().toString());
-            // await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
+            await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36');
         
             // 큐텐 출석체크 페이지 이동
 
@@ -148,7 +147,10 @@ for (let combo of jsonData)
             그 이후는 내가 직접 휴대폰 인증도 하고 리다이렉트도 하도록 하자. */
             
             // TO-DO : 상세정보 페이지를 goto()로 바로 들어갈 수 있는지부터 체크해보자. 그게 안된다면 비밀번호를 입력해서 리다이렉트하도록 하자.
-            if(page.url() === 'https://www.qoo10.com/gmkt.inc/Event/qchance.aspx')
+            await new Promise((page) => setTimeout(page, 5000));
+            console.log('waiting...');
+
+            if(await page.url() === 'https://www.qoo10.com/gmkt.inc/Event/qchance.aspx')
                     {
                         const  INFO_URL = 'https://www.qoo10.com/gmkt.inc/My/CheckPasswd.aspx';
                         const PHONE_URL = 'https://www.qoo10.com/gmkt.inc/Event/CheckMobileConfirmation.aspx?confirm_type=C&next_url=https://m.qoo10.com/gmkt.inc/My/EditMember.aspx';

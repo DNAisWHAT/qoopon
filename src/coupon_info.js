@@ -175,9 +175,9 @@ for (let combo of jsonData)
             var day = ('0' + today.getDate()).slice(-2);
             var dateString = year + '-' + month + '-' + day;
             await page.setViewport({width: 1920, height: 1080});
-            await page.screenshot({path: `../coupons_image_db/${combo[0]}_${dateString}.jpg`});
+            await page.screenshot({path: `../coupons/${combo[0]}_${dateString}.jpg`});
             console.log(`${combo[0]} done.`);
-            await page.close();
+            browser.close();
         })();
 }
 
