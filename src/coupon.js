@@ -14,7 +14,7 @@ const combos = JSON.parse(fs.readFileSync('../combos.json', 'utf8'));
 
 async function main(combo) {
 
-  let browser = await puppeteer.launch({ headless: false, defaultViewport: null, args: 
+  const browser = await puppeteer.launch({ headless: 'on', defaultViewport: null, args: 
   ['--no-sandbox', '--disable-setuid-sandbox'],
 });
 //   const context = await browser.createIncognitoBrowserContext();
@@ -34,6 +34,7 @@ async function main(combo) {
   page.on('dialog', async dialog => {
     console.log(`Dialog message: ${dialog.message()}`);
     await dialog.dismiss(); // dismiss 메서드를 사용하여 대화상자를 닫음
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 동안 대기
   });
 
 
@@ -44,10 +45,10 @@ async function main(combo) {
 
   try {
     await login(page, combo, browser, original_combo);
-    await clickCoupon(page, browser, combo);
+    // await clickCoupon(page, browser, combo);
     // await new Promise((page) => setTimeout(page, 5000000));
     await getCouponInfo(browser, page, combo);
-    await getOrderInformation(page, browser, combo);
+    // await getOrderInformation(page, browser, combo);
     // await getPhoneNumberVerification(page, browser, combo);
 
     // while ( flag ) {
@@ -60,21 +61,22 @@ async function main(combo) {
     // await fetchDeliveryInfo(page, combo);
   }
    catch (error) {
-    if (!browser)
-    browser = await puppeteer.launch({ headless: false, defaultViewport: null, args: 
-      ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    console.error(`${combo[0]} main : ${error.stack}`)
+    // if (!browser)
+    // browser = await puppeteer.launch({ headless: false, defaultViewport: null, args: 
+    //   ['--no-sandbox', '--disable-setuid-sandbox'],
+    // });
     
       if (returnWasErrorBoolean(combo, "getCouponInfoError") || returnWasErrorBoolean(combo, "getOrderInformationError")) 
       {
         if (returnWasErrorBoolean(combo, "clickCouponError")) {
-          await login(page, combo, browser, original_combo);
+          // await login(page, combo, browser, original_combo);
           await clickCoupon(page, browser, combo);
           
         }
 
         else if (returnWasErrorBoolean(combo, "getOrderInformationError")) {
-          await login(page, combo, browser, original_combo);
+          // await login(page, combo, browser, original_combo);
           await getOrderInformation(page, browser, combo);
         }
       }
@@ -139,7 +141,7 @@ async function login (page, combo, browser, original_combo) {
                   combos[index][1] = combo[1];
                   combos[index].push(`${new Date().toISOString().split('T')[0]} PW confirmed`);
                   fs.writeFileSync('../combos.json', JSON.stringify(combos, null, 2));
-                  console.log(`${combo[0]} : 정상적으로 combos.json의 비밀번호를 변경하였습니다.`);
+                  // console.log(`${combo[0]} : 정상적으로 combos.json의 비밀번호를 변경하였습니다.`);
                     }
             }
               
@@ -157,6 +159,15 @@ async function login (page, combo, browser, original_combo) {
             catch ( emailNotConfirmedError ) {
                 if (page.url() === "https://www.qoo10.com/gmkt.inc/Login/Login.aspx")
                 {
+                  let combos = require('../combos.json');
+            let index = combos.findIndex(c => c[0] === combo[0]);
+              if (index !== -1) {
+                let result = combos[index].find(combo => combo.includes('PW confirmed'));
+                if (result) combo[1] = combos[index][1];
+                else combo[1] = ( combo[1] === 'Zxcx!!8520' ) ? 'Zxcx!!852020' : 'Zxcx!!8520';
+                }
+              await login(page, combo, browser, original_combo);
+          
                   combo[1] = ( combo[1] === 'Zxcx!!8520' ) ? 'Zxcx!!852020' : 'Zxcx!!8520';
                   await login(page, combo, browser, original_combo);
 
@@ -167,7 +178,7 @@ async function login (page, combo, browser, original_combo) {
             let combos = require('../combos.json');
             let index = combos.findIndex(c => c[0] === combo[0]);
               if (index !== -1) {
-                let result = combos[index].find(combo => combo.includes('PW confirmed'));
+                let result = combos[index].find(combo => combo.includes(`${new Date().toISOString().split('T')[0]} PW confirmed`));
                 if (result) combo[1] = combos[index][1];
                 else combo[1] = ( combo[1] === 'Zxcx!!8520' ) ? 'Zxcx!!852020' : 'Zxcx!!8520';
                 }
@@ -575,7 +586,7 @@ async function getOrderInformation(page, browser, combo) {
 
 catch (getOrderInformationError) {
     checkErrorAndLetRetry(combo, "getOrderInformationError");
-    console.log(`getOrderInformation Error : ${e}`);
+    console.log(`getOrderInformation Error : ${getOrderInformationError}`);
 }
 
     // await browser.close();
@@ -634,15 +645,22 @@ async function getPhoneNumberVerification(page, browser, combo) {
 async function clickCoupon(page, browser, combo) {
     
     let couponRouletteURL = "https://www.qoo10.com/gmkt.inc/Event/RouletteQ.aspx?frame_id=i_RouletteQ";
-    let frameHandle = await page.$eval("iframe");
-    let frame = await frameHandle.contentFrame();
-    let rouletteButton = await page.$eval("#buttonPlay", button => button);
+    // let frameHandle = await page.$("iframe");
+    // let frame = await frameHandle.contentFrame();
+    // let rouletteButton = await frame.$eval("#buttonPlay", button => button);
 
     try {
         await page.goto(couponRouletteURL);
 
         // await page.waitForNavigation();
+
+        try {
         await page.waitForSelector('#today_click', {timeout : 5000});
+        }
+
+        catch {
+        
+        }
         // await page.click('#today_click');
         await page.evaluate(() => {
             document.querySelector('.attend').click();
@@ -650,11 +668,12 @@ async function clickCoupon(page, browser, combo) {
             // // document.querySelector('#RouletteQ_Layer > div.qcc-layer__btn > a.btn.btn--submit').click();
         }); 
 
-        await page.waitForSelector("#RouletteQ_Layer > div > div > a");
-
-        await page.evaluate(() => {
-          document.querySelector('#RouletteQ_Layer > div > div > a').click();
-        })
+        // await page.waitForSelector("#RouletteQ_Layer");
+        // await page.click('#RouletteQ_Layer > div > div > a');
+        // await page.evaluate(() => {
+        //   document.querySelector('.qcc-layer__inner').click();
+        //   document.querySelector('#RouletteQ_Layer > div > div > a').onclick();
+        // })
 
         await new Promise((page) => setTimeout(page, 5000));
 
@@ -669,6 +688,9 @@ async function clickCoupon(page, browser, combo) {
 
         // 추가로 돌리는 로직 구현
         await page.goto(couponRouletteURL);
+        await page.waitForSelector('.attend');
+        let frame = page.frames().find(f => f.url().startsWith('https://www.qoo10.com/gmkt.inc/Event/Roulette.aspx?r_no=1&frame_id=roulette_board&my_tid_cnt_id=Qticket_MyTicketCnt&confirm_reload_func=RCommon.callParentReloadFunc&before_apply_func=Attendance.frameApply'));
+        let buttonPlay = await frame.$('#buttonPlay'); // 프레임 내에서 #buttonPlay 요소를 선택
 
         let ticketQuantity = await page.evaluate(() => {let ticketQty = document.querySelector("#Qticket_MyTicketCnt").textContent;
         return ticketQty;
@@ -678,10 +700,10 @@ async function clickCoupon(page, browser, combo) {
 
       for (i = 0; i < ticketQuantity; i++)
       {
-        rouletteButton.onclick();
+        await buttonPlay.click();
         await new Promise((page) => setTimeout(page, 5000));
-        await page.goto(couponRouletteURL);
-        await page.waitForSelector('.attend-prize__dt', {timeout : 5000});
+        frame = page.frames().find(f => f.url().startsWith('https://www.qoo10.com/gmkt.inc/Event/Roulette.aspx?r_no=1&frame_id=roulette_board&my_tid_cnt_id=Qticket_MyTicketCnt&confirm_reload_func=RCommon.callParentReloadFunc&before_apply_func=Attendance.frameApply'));
+        buttonPlay = await frame.$('#buttonPlay'); // 프레임 내에서 #buttonPlay 요소를 선택
       }
 
 
@@ -721,7 +743,7 @@ async function returnWasErrorBoolean(combo, errorName) {
   let index = combos.findIndex(c => c[0] === combo[0]);
   if (index !== -1) {
     let errorString = combos[index].join(' '); // 배열의 각 요소를 공백으로 연결하여 하나의 문자열로 만듦
-    console.log(`${combo[0]} : returnWasErrorBoolean(${errorName}) 완료`);
+    // console.log(`${combo[0]} : returnWasErrorBoolean(${errorName}) 완료`);
     return errorString.includes(errorName); // errorString에 errorName이 포함되어 있는지 확인
   }
   return false; // index가 -1인 경우, 즉 combo[0]이 combos.json에 없는 경우, false를 반환
@@ -791,7 +813,7 @@ async function delay(duration) {
     for (const combo of combos) {
       main(combo);
       // await delay(5000); // 5초 대기
-    await new Promise(resolve => setTimeout(resolve, 3000)); // 30초 기다립니다.
+    await new Promise(resolve => setTimeout(resolve, 10000)); // 30초 기다립니다.
     }
 
   }
